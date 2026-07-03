@@ -7,11 +7,13 @@ const { connect_db } = require("./src/lib/db");
 
 const webhook_routes = require("./src/routes/webhook.routes");
 const auth_routes = require("./src/routes/auth.routes");
-const notification_routes = require("./src/routes/notification.routes");
-const agent_routes = require("./src/routes/agent.routes");
+// const notification_routes = require("./src/routes/notification.routes");
+const agent_routes = require("./src/routes/agent_routes");
+const wallet_routes = require("./src/routes/wallet_routes");
+const booking_routes = require("./src/routes/booking_routes");
 
-const { start_flight_reminder_job } = require("./src/jobs/flight_reminder.job");
-const { start_reconciliation_job } = require("./src/jobs/reconciliation.job");
+const { start_flight_reminder_job } = require("./src/jobs/flight_reminder");
+const { start_reconciliation_job } = require("./src/jobs/reconciliation");
 
 const app = express();
 
@@ -19,7 +21,7 @@ const app = express();
 // route needs the raw request body (as bytes) to verify Nomba's signature —
 // if the global JSON parser touches the request first, those raw bytes are
 // gone and every signature check will fail.
-app.use("/webhooks", webhook_routes);
+app.use("/webhook", webhook_routes);
 
 // Everything else uses normal JSON parsing.
 app.use(express.json());
@@ -37,6 +39,8 @@ app.use(
 app.use("/auth", auth_routes);
 app.use("/notifications", notification_routes);
 app.use("/agent", agent_routes);
+app.use("/wallet", wallet_routes);
+app.use("/bookings", booking_routes);
 
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 

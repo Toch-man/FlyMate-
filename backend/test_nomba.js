@@ -49,6 +49,7 @@ async function run() {
     console.log(banks.slice(0, 3));
   } catch (error) {
     console.error("   ❌ Bank codes fetch failed:", error.message);
+    console.error("   Full error:", error); // shows the real cause, not just the message
   }
 
   console.log(
