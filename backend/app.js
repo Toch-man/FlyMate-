@@ -5,15 +5,14 @@ const cookie_parser = require("cookie-parser");
 
 const { connect_db } = require("./src/lib/db");
 
-const webhook_routes = require("./src/routes/webhook.routes");
-const auth_routes = require("./src/routes/auth.routes");
+const webhook_routes = require("./routes/webhook");
+const auth_routes = require("./routes/auth_route");
 // const notification_routes = require("./src/routes/notification.routes");
-const agent_routes = require("./src/routes/agent_routes");
-const wallet_routes = require("./src/routes/wallet_routes");
-const booking_routes = require("./src/routes/booking_routes");
+const agent_routes = require("./routes/agent_routes");
+const wallet_routes = require("./routes/wallet_routes");
 
-const { start_flight_reminder_job } = require("./src/jobs/flight_reminder");
-const { start_reconciliation_job } = require("./src/jobs/reconciliation");
+const { start_flight_reminder_job } = require("./jobs/flight_reminder");
+const { start_reconciliation_job } = require("./jobs/reconciliation");
 
 const app = express();
 
