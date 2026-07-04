@@ -14,13 +14,13 @@ export default function HomePage() {
         </p>
         <div className="flex items-center justify-center gap-4 pt-4">
           <Link
-            href="/register"
+            href="/auth/register"
             className="bg-green-700 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-800"
           >
             Get started
           </Link>
           <Link
-            href="/login"
+            href="/auth/login"
             className="border border-green-700 text-green-700 px-6 py-3 rounded-lg font-medium hover:bg-green-50"
           >
             Log in
