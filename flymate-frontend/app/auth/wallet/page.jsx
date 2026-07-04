@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api_fetch } from "../../lib/api";
+import { api_fetch } from "../../../lib/api";
 
 export default function WalletPage() {
   const [wallet, setWallet] = useState(null);
