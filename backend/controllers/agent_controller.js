@@ -1,9 +1,9 @@
-const { flymate_agent } = require("../AI/agent");
+const { flymate_agent } = require("../ai/agent");
 
-// "history" is how the AI remembers earlier parts of the conversation. We're
-// not saving it to the database yet — the frontend sends back whatever
-// messages came in the previous response, and we send them along again.
-// Simple, works fine for now, can move to the database later if needed.
+// Keeping history as simple {role, content} pairs only (no raw tool-call
+// messages echoed back) — much lower risk of a serialization mismatch than
+// round-tripping LangChain's internal message objects through JSON, and
+// plenty for maintaining conversation context.
 async function chat_with_agent(req, res) {
   try {
     const { message, history } = req.body;
@@ -16,13 +16,27 @@ async function chat_with_agent(req, res) {
       messages: [...(history || []), { role: "user", content: message }],
     });
 
-    // The agent may have gone through several internal steps (deciding to
-    // search, reading results, etc). We only care about its final reply.
     const last_message = result.messages[result.messages.length - 1];
+
+    // Find the most recent tool result, if the agent searched for flights
+    // this turn, so the frontend can render real clickable flight cards
+    // instead of just parsing the AI's prose.
+    const last_tool_message = [...result.messages]
+      .reverse()
+      .find((m) => m._getType?.() === "tool");
+
+    let flight_options = null;
+    if (last_tool_message) {
+      try {
+        flight_options = JSON.parse(last_tool_message.content);
+      } catch {
+        flight_options = null;
+      }
+    }
 
     return res.status(200).json({
       reply: last_message.content,
-      history: result.messages,
+      flight_options,
     });
   } catch (error) {
     console.error("chat_with_agent error:", error);

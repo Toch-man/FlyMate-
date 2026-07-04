@@ -10,7 +10,6 @@ interface LoginForm {
 }
 
 interface LoginResponse {
-  access_token: string;
   user: { id: string; full_name: string; email: string };
 }
 
@@ -29,7 +28,6 @@ export default function LoginPage() {
         method: "POST",
         body: JSON.stringify(form),
       });
-      localStorage.setItem("access_token", data.access_token);
       router.push("/auth/wallet");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");

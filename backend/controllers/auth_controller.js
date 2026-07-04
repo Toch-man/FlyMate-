@@ -114,9 +114,14 @@ async function login(req, res) {
       sameSite: "none",
       maxAge: REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
     });
+    res.cookie("access_token", access_token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 15 * 60 * 1000,
+    });
 
     return res.status(200).json({
-      access_token,
       user: { id: user._id, full_name: user.full_name, email: user.email },
     });
   } catch (error) {
@@ -162,7 +167,13 @@ async function refresh(req, res) {
     }
 
     const access_token = generate_access_token(user);
-    return res.status(200).json({ access_token });
+    res.cookie("access_token", access_token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 15 * 60 * 1000,
+    });
+    return res.status(200).json({ message: "token sent to cookie" });
   } catch (error) {
     console.error("refresh error:", error);
     return res.status(401).json({ error: "Could not refresh session" });

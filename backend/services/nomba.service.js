@@ -253,6 +253,18 @@ async function get_user_saved_cards({ order_reference }) {
   return data.tokenizedCardData; // [{ tokenKey, customerEmail, cardType, cardPan, tokenExpirationDate }]
 }
 
+// Confirmed endpoint: GET /v1/checkout/order/{orderReference} — lets you
+// actively check payment status instead of only waiting on the webhook.
+// Exact success-status field name unconfirmed — handled defensively where used.
+async function get_checkout_order_status({ order_reference }) {
+  return nomba_request(
+    `/v1/checkout/order/${encodeURIComponent(order_reference)}`,
+    {
+      method: "GET",
+    },
+  );
+}
+
 module.exports = {
   get_access_token,
   create_virtual_account,
@@ -266,4 +278,5 @@ module.exports = {
   charge_tokenized_card,
   request_saved_card_otp,
   get_user_saved_cards,
+  get_checkout_order_status,
 };

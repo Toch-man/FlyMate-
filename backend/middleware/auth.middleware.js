@@ -3,7 +3,7 @@ const User = require("../model/user");
 
 /**
  * Middleware that authenticates a user by verifying the JWT access token
- * sent in the Authorization header (Bearer scheme).
+ * sent in the httpOnly cookie (set by the login endpoint).
  *
  * On success it attaches the full user document (minus the password hash) to
  * `req.user` so downstream handlers can access `req.user.id`, `req.user.email`,
@@ -11,12 +11,11 @@ const User = require("../model/user");
  */
 async function authenticate_user(req, res, next) {
   try {
-    const auth_header = req.headers.authorization;
-    if (!auth_header || !auth_header.startsWith("Bearer ")) {
+    const token = req.cookies?.access_token;
+    if (!token) {
       return res.status(401).json({ error: "Access token is required" });
     }
 
-    const token = auth_header.split(" ")[1];
     const payload = verify_access_token(token);
 
     const user = await User.findById(payload.user_id).select("-password_hash");

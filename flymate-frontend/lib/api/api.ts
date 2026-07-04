@@ -4,10 +4,9 @@ interface ApiErrorResponse {
   error?: string;
 }
 
-// The access_token is kept in localStorage (survives a page refresh). The
-// refresh_token itself lives in an httpOnly cookie your browser sends
-// automatically — we never touch that directly, `credentials: "include"`
-// just makes sure it's included on requests.
+// Both the access_token and refresh_token live in httpOnly cookies set by
+// the backend. The browser sends them automatically on every request thanks
+// to `credentials: "include"` — we never touch them from JavaScript.
 export async function api_fetch<T = unknown>(
   path: string,
   options: RequestInit = {},
