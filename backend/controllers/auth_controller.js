@@ -9,7 +9,7 @@ const { create_virtual_account } = require("../services/nomba.service");
 
 const REFRESH_TOKEN_EXPIRY_DAYS = 7;
 
-async function register(req, res) {
+export ssasync function register(req, res) {
   let created_user = null;
 
   try {
