@@ -1,4 +1,4 @@
-const Notification = require("../models/notification.model");
+const Notification = require("../model/notification_model");
 
 // Called inline from any controller (booking, payment, reminder job, etc.)
 // whenever a user needs to be notified in-app.

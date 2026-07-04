@@ -7,7 +7,7 @@ const { connect_db } = require("./src/lib/db");
 
 const webhook_routes = require("./routes/webhook");
 const auth_routes = require("./routes/auth_route");
-// const notification_routes = require("./src/routes/notification.routes");
+const notification_routes = require("./routes/notification_routes");
 const agent_routes = require("./routes/agent_routes");
 const wallet_routes = require("./routes/wallet_routes");
 
@@ -39,7 +39,7 @@ app.use("/auth", auth_routes);
 app.use("/notifications", notification_routes);
 app.use("/agent", agent_routes);
 app.use("/wallet", wallet_routes);
-app.use("/bookings", booking_routes);
+// app.use("/bookings", booking_routes);
 
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 

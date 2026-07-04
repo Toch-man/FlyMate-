@@ -1,6 +1,6 @@
 const cron = require("node-cron");
-const Booking = require("../models/booking.model");
-const Notification = require("../models/notification.model");
+const Booking = require("../model/booking_model");
+const Notification = require("../model/notification_model");
 const { create_notification } = require("../utils/notify.util");
 
 // Hours-before-departure windows to remind users at.

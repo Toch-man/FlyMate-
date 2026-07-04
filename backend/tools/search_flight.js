@@ -1,6 +1,6 @@
 const { tool } = require("@langchain/core/tools");
 const { z } = require("zod");
-const { search_flights_duffel } = require("../../services/duffel.service");
+const { search_flights_duffel } = require("../services/duffel.service");
 
 // Same interface as the mock version — the agent doesn't know or care that
 // this is now hitting a real API instead of returning a fake array.

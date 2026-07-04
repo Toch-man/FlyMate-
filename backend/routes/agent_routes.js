@@ -1,6 +1,6 @@
 const express = require("express");
 const { authenticate_user } = require("../middleware/auth.middleware");
-const { chat_with_agent } = require("../controllers/agent.controller");
+const { chat_with_agent } = require("../controllers/agent_controller");
 
 const router = express.Router();
 

@@ -1,4 +1,4 @@
-const { flymate_agent } = require("../ai/agent");
+const { flymate_agent } = require("../AI/agent");
 
 // "history" is how the AI remembers earlier parts of the conversation. We're
 // not saving it to the database yet — the frontend sends back whatever

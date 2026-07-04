@@ -1,5 +1,5 @@
 const express = require("express");
-const { handle_nomba_webhook } = require("../controllers/webhook.controller");
+const { handle_nomba_webhook } = require("../controllers/webhook_controller");
 
 const router = express.Router();
 

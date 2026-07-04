@@ -1,5 +1,5 @@
 const cron = require("node-cron");
-const Transaction = require("../models/transaction.model");
+const Transaction = require("../model/transaction_model");
 const { fetch_transactions } = require("../services/nomba.service");
 
 // Matches your training's exact recommended pattern: pull Nomba's own

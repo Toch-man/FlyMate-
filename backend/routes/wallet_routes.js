@@ -5,7 +5,7 @@ const {
   lookup_bank,
   get_my_wallet,
   get_platform_balance,
-} = require("../controllers/wallet.controller");
+} = require("../controllers/wallet_controller");
 
 const router = express.Router();
 

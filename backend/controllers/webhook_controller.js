@@ -1,6 +1,6 @@
 const crypto = require("crypto");
-const User = require("../models/user.model");
-const Transaction = require("../models/transaction.model");
+const User = require("../model/user");
+const Transaction = require("../model/transaction_model");
 const { create_notification } = require("../utils/notify.util");
 
 // Per your hackathon training: HMAC-SHA256 over the RAW request body (not a
