@@ -1,10 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api_fetch } from "../../../lib/api";
+import { api_fetch } from "../../../lib/api/api";
+
+interface VirtualAccount {
+  account_ref?: string;
+  bank_account_number?: string;
+  bank_account_name?: string;
+  bank_name?: string;
+  currency?: string;
+}
+
+interface WalletResponse {
+  wallet_balance: number;
+  virtual_account: VirtualAccount | null;
+}
 
 export default function WalletPage() {
-  const [wallet, setWallet] = useState(null);
+  const [wallet, setWallet] = useState<WalletResponse | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -12,10 +25,10 @@ export default function WalletPage() {
     setLoading(true);
     setError("");
     try {
-      const data = await api_fetch("/wallet/me");
+      const data = await api_fetch<WalletResponse>("/wallet/me");
       setWallet(data);
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }

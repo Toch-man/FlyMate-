@@ -1,12 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { api_fetch } from "../../../lib/api";
+import { api_fetch } from "../../../lib/api/api";
+
+interface RegisterForm {
+  full_name: string;
+  email: string;
+  password: string;
+  phone_number: string;
+}
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<RegisterForm>({
     full_name: "",
     email: "",
     password: "",
@@ -15,7 +22,7 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handle_submit(e) {
+  async function handle_submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -28,7 +35,7 @@ export default function RegisterPage() {
       });
       router.push("/login");
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }

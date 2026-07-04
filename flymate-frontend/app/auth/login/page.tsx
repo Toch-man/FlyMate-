@@ -1,28 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { api_fetch } from "../../../lib/api";
+import { api_fetch } from "../../../lib/api/api";
+
+interface LoginForm {
+  email: string;
+  password: string;
+}
+
+interface LoginResponse {
+  access_token: string;
+  user: { id: string; full_name: string; email: string };
+}
 
 export default function LoginPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState<LoginForm>({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handle_submit(e) {
+  async function handle_submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
-      const data = await api_fetch("/auth/login", {
+      const data = await api_fetch<LoginResponse>("/auth/login", {
         method: "POST",
         body: JSON.stringify(form),
       });
       localStorage.setItem("access_token", data.access_token);
       router.push("/wallet");
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
