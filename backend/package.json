@@ -4,11 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@duffel/api": "^4.28.0",
     "@langchain/core": "^1.2.1",
     "@langchain/google-genai": "^2.2.0",
     "@langchain/langgraph": "^1.4.7",
@@ -22,6 +25,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.7.3",
     "node-cron": "^4.5.0",
+    "nodemon": "^3.1.14",
     "zod": "^4.4.3"
   }
 }
