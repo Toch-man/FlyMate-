@@ -1,14 +1,9 @@
-// Confirmed from the verified-endpoints guide: sandbox.nomba.com, /v1
-// NOT baked into the base — every path below includes it explicitly.
 const NOMBA_BASE_URL =
   process.env.NOMBA_BASE_URL || "https://sandbox.nomba.com";
 
 let cached_token = null;
 let token_expires_at = null;
 
-// accountId header on auth (and on EVERY call, per the new guide) is the
-// PARENT account. Sub-account scoping happens via {subAccountId} in the URL
-// path on the specific endpoints that need it — not via this header.
 async function get_access_token() {
   if (cached_token && token_expires_at && Date.now() < token_expires_at) {
     return cached_token;
@@ -62,7 +57,9 @@ async function nomba_request(path, options = {}) {
   return data.data;
 }
 
-// Confirmed: POST /v1/accounts/virtual/{subAccountId}
+// Kept but de-prioritized per current direction — card checkout is the
+// primary payment path now. Still fully working if you want a bank-transfer
+// funding option later.
 async function create_virtual_account({
   account_ref,
   account_name,
@@ -81,27 +78,15 @@ async function create_virtual_account({
   );
 }
 
-// Fixed: relative path, not a hardcoded absolute URL — passing a full URL
-// here would have concatenated onto NOMBA_BASE_URL and built a broken
-// double-domain request.
 async function fetch_bank_codes() {
   const data = await nomba_request("/v1/transfers/banks", { method: "GET" });
 
-  // TEMP DEBUG: log the raw shape so we can see exactly what came back —
-  // remove this line once fetch_bank_codes is confirmed working.
-  console.log(
-    "RAW /v1/transfers/banks response:",
-    JSON.stringify(data, null, 2),
-  );
-
-  // Defensive: handle either { results: [...] } or a bare array, since we
-  // don't yet know for certain which shape this endpoint actually returns.
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.results)) return data.results;
   if (Array.isArray(data?.banks)) return data.banks;
 
   throw new Error(
-    "Unrecognized response shape from /v1/transfers/banks — see the RAW log above and adjust fetch_bank_codes to match it.",
+    "Unrecognized response shape from /v1/transfers/banks — log `data` here to see the real shape.",
   );
 }
 
@@ -115,11 +100,6 @@ async function lookup_bank_account({ account_number, bank_code }) {
   });
 }
 
-// Confirmed: POST /v2/transfers/bank/{subAccountId} — scoped via path, same
-// pattern as virtual account creation. Amount converted to kobo here.
-// merchantTxRef (in the body) is the documented mechanism that prevents
-// duplicate transfers — no separate idempotency header is mentioned
-// anywhere in the verified-endpoints guide, so not adding one on a guess.
 async function transfer_to_bank({
   amount,
   account_number,
@@ -148,9 +128,6 @@ async function transfer_to_bank({
   );
 }
 
-// Confirmed: GET /v1/transactions/accounts/{subAccountId} — "reconcile
-// inflows" per the guide. Query filters (dateFrom/dateTo/status/type) kept
-// on top, matching the training's filtering behavior.
 async function fetch_transactions({
   date_from,
   date_to,
@@ -174,8 +151,6 @@ async function fetch_transactions({
   );
 }
 
-// Confirmed: GET /v1/transactions/requery/{sessionId} — "confirm" a specific
-// transaction. Lower priority for tonight; keeping it available.
 async function requery_transaction({ session_id }) {
   return nomba_request(
     `/v1/transactions/requery/${encodeURIComponent(session_id)}`,
@@ -185,7 +160,6 @@ async function requery_transaction({ session_id }) {
   );
 }
 
-// Confirmed: GET /v1/accounts/{subAccountId}/balance
 async function get_sub_account_balance() {
   return nomba_request(
     `/v1/accounts/${process.env.NOMBA_SUB_ACCOUNT_ID}/balance`,
@@ -193,6 +167,90 @@ async function get_sub_account_balance() {
       method: "GET",
     },
   );
+}
+
+// ---- Card checkout (now the primary payment path) ----
+
+// Creates a hosted checkout order. Redirect the user to the returned
+// checkoutLink — Nomba's page handles card entry, OTP, and PCI compliance.
+// Pass tokenize_card: true on a user's FIRST payment to save their card for
+// future use — this is what lets returning users skip re-entering card
+// details.
+//
+// NOTE: amount here is a DECIMAL STRING IN NAIRA ("10000.00"), unlike
+// transfer_to_bank which uses integer kobo — confirmed different conventions
+// within the same API.
+async function create_checkout_order({
+  order_reference,
+  amount,
+  customer_email,
+  callback_url,
+  customer_id,
+  tokenize_card = false,
+}) {
+  return nomba_request("/v1/checkout/order", {
+    method: "POST",
+    body: JSON.stringify({
+      order: {
+        orderReference: order_reference,
+        callbackUrl: callback_url,
+        customerEmail: customer_email,
+        amount: amount.toFixed(2),
+        currency: "NGN",
+        customerId: customer_id,
+        accountId: process.env.NOMBA_SUB_ACCOUNT_ID,
+        allowedPaymentMethods: ["Card", "Transfer"],
+      },
+      ...(tokenize_card ? { tokenizeCard: "true" } : {}),
+    }),
+  });
+}
+
+// Charges a PREVIOUSLY SAVED card using its tokenKey — no card re-entry, no
+// hosted redirect needed. This is the "remember my card" payment path for a
+// returning user's second+ booking.
+async function charge_tokenized_card({
+  order_reference,
+  customer_id,
+  customer_email,
+  callback_url,
+  amount,
+  token_key,
+}) {
+  return nomba_request("/v1/checkout/tokenized-card-payment", {
+    method: "POST",
+    body: JSON.stringify({
+      order: {
+        orderReference: order_reference,
+        customerId: customer_id,
+        callbackUrl: callback_url,
+        customerEmail: customer_email,
+        amount: amount.toFixed(2),
+        currency: "NGN",
+        accountId: process.env.NOMBA_SUB_ACCOUNT_ID,
+      },
+      tokenKey: token_key,
+    }),
+  });
+}
+
+// Before you can retrieve a user's saved card(s), Nomba sends them an OTP
+// to confirm it's really them. Call this first.
+async function request_saved_card_otp({ order_reference }) {
+  return nomba_request("/v1/checkout/user-card/saved-card/auth", {
+    method: "POST",
+    body: JSON.stringify({ orderReference: order_reference }),
+  });
+}
+
+// Call AFTER the OTP from request_saved_card_otp has been entered/verified.
+// Returns the tokenKey(s) you need for charge_tokenized_card.
+async function get_user_saved_cards({ order_reference }) {
+  const data = await nomba_request(
+    `/v1/checkout/user-card/${encodeURIComponent(order_reference)}`,
+    { method: "GET" },
+  );
+  return data.tokenizedCardData; // [{ tokenKey, customerEmail, cardType, cardPan, tokenExpirationDate }]
 }
 
 module.exports = {
@@ -204,4 +262,8 @@ module.exports = {
   fetch_transactions,
   requery_transaction,
   get_sub_account_balance,
+  create_checkout_order,
+  charge_tokenized_card,
+  request_saved_card_otp,
+  get_user_saved_cards,
 };

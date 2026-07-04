@@ -29,11 +29,11 @@ export default function RegisterPage() {
     try {
       // Registration also creates the user's Nomba virtual account on the
       // backend — this call can take a couple seconds, that's expected.
-      await api_fetch("/auth/register", {
+      await api_fetch("/auth/sign_in", {
         method: "POST",
         body: JSON.stringify(form),
       });
-      router.push("/login");
+      router.push("/auth/login");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
