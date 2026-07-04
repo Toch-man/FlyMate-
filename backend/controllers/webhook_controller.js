@@ -1,7 +1,7 @@
 const crypto = require("crypto");
-const User = require("../models/user.model");
-const Booking = require("../models/booking.model");
-const Transaction = require("../models/transaction.model");
+const User = require("../model/user");
+const Booking = require("../model/booking_model");
+const Transaction = require("../model/transaction_model");
 const { create_notification } = require("../utils/notify.util");
 
 function verify_signature(raw_body, req) {

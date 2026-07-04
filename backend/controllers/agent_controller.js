@@ -1,4 +1,4 @@
-const { flymate_agent } = require("../ai/agent");
+const { flymate_agent } = require("../AI/agent");
 
 // Keeping history as simple {role, content} pairs only (no raw tool-call
 // messages echoed back) — much lower risk of a serialization mismatch than
