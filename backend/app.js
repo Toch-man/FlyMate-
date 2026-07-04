@@ -28,7 +28,7 @@ app.use(cookie_parser());
 
 // credentials: true is required for the httpOnly refresh_token cookie to
 // work across your frontend (Next.js) and backend domains.
-const allowed_origins = [process.env.CLIENT_URL, "http://localhost:3000"];
+const allowed_origins = [process.env.FRONTEND_URL, "http://localhost:3000"];
 
 app.use(
   cors({
