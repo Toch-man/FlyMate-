@@ -25,7 +25,9 @@ if (!account_ref || !amount_naira) {
 }
 
 // CHANGE THIS to your real deployed URL before running against production.
-const WEBHOOK_URL = "https://flymate-t18x.onrender.com/webhooks/nomba";
+// Confirmed via curl: /api/webhook/nomba is the real live path, matching
+// what's already registered with Nomba.
+const WEBHOOK_URL = "https://flymate-t18x.onrender.com/api/webhook/nomba";
 
 const amount_kobo = Math.round(Number(amount_naira) * 100);
 const timestamp = new Date().toISOString(); // RFC-3339, e.g. 2026-01-01T15:45:22Z
