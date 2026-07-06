@@ -60,28 +60,26 @@ function CallbackContent() {
   }, [booking_id]);
 
   if (error) {
-    return <p className="text-[var(--color-coral)]">{error}</p>;
+    return <p className="text-(--color-coral)">{error}</p>;
   }
 
   if (!booking) {
-    return (
-      <p className="text-[var(--color-ink)]/60">Checking your payment...</p>
-    );
+    return <p className="text-(--color-ink)/60">Checking your payment...</p>;
   }
 
   const status_copy = STATUS_COPY[booking.status];
 
   return (
-    <div className="ticket-notch relative bg-white border-2 border-[var(--color-ink)] rounded-2xl w-full max-w-sm p-8 shadow-[6px_6px_0_0_var(--color-ink)] text-center">
+    <div className="animate-in ticket-notch relative bg-white border-2 border-(--color-ink) rounded-2xl w-full max-w-sm p-8 shadow-[6px_6px_0_0_var(--color-ink)] text-center">
       <p className={`font-display font-bold text-2xl ${status_copy.tone}`}>
         {status_copy.title}
       </p>
-      <p className="text-sm text-[var(--color-ink)]/60 mt-2">
+      <p className="text-sm text-(--color-ink)/60 mt-2">
         {booking.origin} → {booking.destination} · ₦
         {booking.price.toLocaleString()}
       </p>
       {booking.status === "pending" && (
-        <p className="text-xs text-[var(--color-ink)]/40 mt-4">
+        <p className="text-xs text-(--color-ink)/40 mt-4">
           This can take a few seconds — hang tight.
         </p>
       )}
@@ -92,9 +90,7 @@ function CallbackContent() {
 export default function BookingCallbackPage() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-16 flex justify-center">
-      <Suspense
-        fallback={<p className="text-[var(--color-ink)]/60">Loading...</p>}
-      >
+      <Suspense fallback={<p className="text-(--color-ink)/60">Loading...</p>}>
         <CallbackContent />
       </Suspense>
     </div>

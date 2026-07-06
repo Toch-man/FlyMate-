@@ -2,7 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { api_fetch } from "../../../lib/api/api";
+import { api_fetch } from "@/lib/api/api";
 
 interface RegisterForm {
   full_name: string;
@@ -27,9 +27,7 @@ export default function RegisterPage() {
     setError("");
     setLoading(true);
     try {
-      // Registration also creates the user's Nomba virtual account on the
-      // backend — this call can take a couple seconds, that's expected.
-      await api_fetch("/auth/sign_in", {
+      await api_fetch("/auth/register", {
         method: "POST",
         body: JSON.stringify(form),
       });
@@ -42,59 +40,71 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="relative max-w-5xl mx-auto px-6 py-16 flex justify-center overflow-hidden">
+      <div className="bg-blob top-0 right-1/3 w-64 h-64 bg-(--color-lime)" />
+
       <form
         onSubmit={handle_submit}
-        className="w-full max-w-sm bg-white p-6 rounded-xl shadow space-y-4"
+        className="animate-in ticket-notch relative bg-white border-2 border-(--color-ink) rounded-2xl w-full max-w-sm p-8 shadow-[6px_6px_0_0_var(--color-ink)]"
       >
-        <h1 className="text-xl font-semibold text-green-700">
-          Create your FlyMate account
-        </h1>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        <h1 className="font-display font-bold text-2xl">Get on board</h1>
+        <p className="text-sm text-(--color-ink)/60 mt-1">
+          Create your account, we'll set up your wallet too.
+        </p>
 
-        <input
-          type="text"
-          placeholder="Full name"
-          className="w-full border rounded-lg px-3 py-2"
-          value={form.full_name}
-          onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-          required
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full border rounded-lg px-3 py-2"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full border rounded-lg px-3 py-2"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-          required
-        />
-        <input
-          type="tel"
-          placeholder="Phone number (optional)"
-          className="w-full border rounded-lg px-3 py-2"
-          value={form.phone_number}
-          onChange={(e) => setForm({ ...form, phone_number: e.target.value })}
-        />
+        <div className="perforation my-6" />
+
+        {error && (
+          <p className="text-sm text-(--color-coral) font-medium mb-4">
+            {error}
+          </p>
+        )}
+
+        <div className="space-y-5">
+          <input
+            type="text"
+            placeholder="Full name"
+            className="w-full border-b-2 border-(--color-ink)/20 focus:border-(--color-cobalt) outline-none py-2 bg-transparent transition-colors"
+            value={form.full_name}
+            onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+            required
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            className="w-full border-b-2 border-(--color-ink)/20 focus:border-(--color-cobalt) outline-none py-2 bg-transparent transition-colors"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full border-b-2 border-(--color-ink)/20 focus:border-(--color-cobalt) outline-none py-2 bg-transparent transition-colors"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            required
+          />
+          <input
+            type="tel"
+            placeholder="Phone number (optional)"
+            className="w-full border-b-2 border-(--color-ink)/20 focus:border-(--color-cobalt) outline-none py-2 bg-transparent transition-colors"
+            value={form.phone_number}
+            onChange={(e) => setForm({ ...form, phone_number: e.target.value })}
+          />
+        </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-green-700 text-white rounded-lg py-2 font-medium disabled:opacity-50"
+          className="btn-press w-full mt-8 bg-(--color-ink) text-(--color-bg) rounded-full py-3 font-display font-bold hover:bg-(--color-cobalt) transition-colors disabled:opacity-50"
         >
           {loading ? "Creating account..." : "Sign up"}
         </button>
 
-        <p className="text-sm text-center text-gray-500">
+        <p className="text-sm text-center text-(--color-ink)/60 mt-5">
           Already have an account?{" "}
-          <a href="/login" className="text-green-700 font-medium">
+          <a href="/auth/login" className="font-medium text-(--color-cobalt)">
             Log in
           </a>
         </p>

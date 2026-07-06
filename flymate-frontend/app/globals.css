@@ -1,26 +1,158 @@
 @import "tailwindcss";
 
+/* --- FlyMate design system additions ---
+   Add everything below to the BOTTOM of your existing globals.css.
+   Keep your existing @tailwind / @import "tailwindcss" lines at the top as they are. */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-bg: #fffdf7;
+  --color-ink: #14151a;
+  --color-lime: #d6ff3f;
+  --color-cobalt: #3d5cff;
+  --color-coral: #ff4d6d;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-inter), sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-space-grotesk), sans-serif;
+}
+
+.font-ticket {
+  font-family: var(--font-plex-mono), monospace;
+}
+
+/* Dashed perforation line, like the tear-line on a paper ticket */
+.perforation {
+  border-top: 2px dashed rgba(20, 21, 26, 0.2);
+  position: relative;
+}
+
+/* The two circular notches cut into a boarding-pass card's edges.
+   Uses solid circles matching the page background rather than true
+   clip-path cutouts, since it's simpler and works reliably regardless of
+   what's behind the card. */
+.ticket-notch::before,
+.ticket-notch::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  background: var(--color-bg);
+  border-radius: 9999px;
+  transform: translateY(-50%);
+}
+
+.ticket-notch::before {
+  left: -12px;
+}
+
+.ticket-notch::after {
+  right: -12px;
+}
+
+/* Keyboard focus visibility, kept even though the rest of the design is playful */
+:focus-visible {
+  outline: 2px solid var(--color-cobalt);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* --- Motion additions for a livelier, more interactive feel --- */
+
+@keyframes fade_in_up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fade_in_up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(-1deg);
+  }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes pulse_glow {
+  0%,
+  100% {
+    box-shadow: 6px 6px 0 0 var(--color-ink);
+  }
+  50% {
+    box-shadow: 10px 10px 0 0 var(--color-lime);
+  }
+}
+
+.animate-glow {
+  animation: pulse_glow 3s ease-in-out infinite;
+}
+
+/* Punchy press feedback on every button */
+.btn-press {
+  transition:
+    transform 0.15s ease,
+    background-color 0.2s ease;
+}
+
+.btn-press:active {
+  transform: scale(0.96);
+}
+
+/* Animated gradient blob for background depth, kept subtle */
+.bg-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(60px);
+  opacity: 0.35;
+  z-index: -1;
+  animation: blob_move 12s ease-in-out infinite;
+}
+
+@keyframes blob_move {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -20px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-in,
+  .animate-float,
+  .animate-glow,
+  .bg-blob {
+    animation: none !important;
+  }
 }

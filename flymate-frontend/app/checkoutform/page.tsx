@@ -64,14 +64,14 @@ function CheckoutForm() {
 
   if (wallet_success) {
     return (
-      <div className="ticket-notch relative bg-white border-2 border-[var(--color-ink)] rounded-2xl w-full max-w-sm p-8 shadow-[6px_6px_0_0_var(--color-ink)] text-center">
+      <div className="animate-in ticket-notch relative bg-white border-2 border-(--color-ink) rounded-2xl w-full max-w-sm p-8 shadow-[6px_6px_0_0_var(--color-ink)] text-center">
         <p className="font-display font-bold text-2xl">Flight booked!</p>
-        <p className="text-sm text-[var(--color-ink)]/60 mt-2">
+        <p className="text-sm text-(--color-ink)/60 mt-2">
           {origin} → {destination}, paid from your wallet.
         </p>
         <button
           onClick={() => router.push("/wallet")}
-          className="w-full mt-6 bg-[var(--color-ink)] text-[var(--color-bg)] rounded-full py-3 font-display font-bold hover:bg-[var(--color-cobalt)] transition-colors"
+          className="btn-press w-full mt-6 bg-(--color-ink) text-(--color-bg) rounded-full py-3 font-display font-bold hover:bg-(--color-cobalt) transition-colors"
         >
           View wallet
         </button>
@@ -80,20 +80,20 @@ function CheckoutForm() {
   }
 
   return (
-    <div className="ticket-notch relative bg-white border-2 border-[var(--color-ink)] rounded-2xl w-full max-w-sm p-8 shadow-[6px_6px_0_0_var(--color-ink)]">
-      <p className="text-xs uppercase tracking-wide text-[var(--color-ink)]/50">
+    <div className="animate-in ticket-notch relative bg-white border-2 border-(--color-ink) rounded-2xl w-full max-w-sm p-8 shadow-[6px_6px_0_0_var(--color-ink)]">
+      <p className="text-xs uppercase tracking-wide text-(--color-ink)/50">
         Confirm & pay
       </p>
       <div className="flex items-center justify-between font-ticket text-3xl font-medium mt-2">
         <span>{origin}</span>
-        <span className="text-[var(--color-coral)]">→</span>
+        <span className="text-(--color-coral)">→</span>
         <span>{destination}</span>
       </div>
-      <p className="text-sm text-[var(--color-ink)]/60 mt-1">{depart_date}</p>
+      <p className="text-sm text-(--color-ink)/60 mt-1">{depart_date}</p>
 
       <div className="perforation my-6" />
 
-      <p className="text-xs uppercase tracking-wide text-[var(--color-ink)]/50">
+      <p className="text-xs uppercase tracking-wide text-(--color-ink)/50">
         Total
       </p>
       <p className="font-ticket text-3xl font-medium">
@@ -105,10 +105,10 @@ function CheckoutForm() {
         <button
           type="button"
           onClick={() => setPaymentMethod("card")}
-          className={`rounded-xl border-2 py-3 font-display font-bold transition-colors ${
+          className={`btn-press rounded-xl border-2 py-3 font-display font-bold transition-colors ${
             payment_method === "card"
-              ? "border-[var(--color-ink)] bg-[var(--color-lime)]"
-              : "border-[var(--color-ink)]/20"
+              ? "border-(--color-ink) bg-(--color-lime)"
+              : "border-(--color-ink)/20"
           }`}
         >
           Card
@@ -116,10 +116,10 @@ function CheckoutForm() {
         <button
           type="button"
           onClick={() => setPaymentMethod("wallet")}
-          className={`rounded-xl border-2 py-3 font-display font-bold transition-colors ${
+          className={`btn-press rounded-xl border-2 py-3 font-display font-bold transition-colors ${
             payment_method === "wallet"
-              ? "border-[var(--color-ink)] bg-[var(--color-lime)]"
-              : "border-[var(--color-ink)]/20"
+              ? "border-(--color-ink) bg-(--color-lime)"
+              : "border-(--color-ink)/20"
           }`}
         >
           Wallet
@@ -136,7 +136,7 @@ function CheckoutForm() {
         type="button"
         onClick={handle_pay}
         disabled={loading}
-        className="w-full mt-6 bg-[var(--color-ink)] text-[var(--color-bg)] rounded-full py-3 font-display font-bold hover:bg-[var(--color-cobalt)] transition-colors disabled:opacity-50"
+        className="btn-press w-full mt-6 bg-[var(--color-ink)] text-[var(--color-bg)] rounded-full py-3 font-display font-bold hover:bg-[var(--color-cobalt)] transition-colors disabled:opacity-50"
       >
         {loading ? "Processing..." : `Pay ₦${price.toLocaleString()}`}
       </button>
@@ -146,7 +146,8 @@ function CheckoutForm() {
 
 export default function CheckoutPage() {
   return (
-    <div className="max-w-5xl mx-auto px-6 py-16 flex justify-center">
+    <div className="relative max-w-5xl mx-auto px-6 py-16 flex justify-center overflow-hidden">
+      <div className="bg-blob top-0 left-1/3 w-64 h-64 bg-[var(--color-cobalt)]" />
       <Suspense
         fallback={<p className="text-[var(--color-ink)]/60">Loading...</p>}
       >

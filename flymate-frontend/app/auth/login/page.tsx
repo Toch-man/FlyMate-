@@ -10,6 +10,7 @@ interface LoginForm {
 }
 
 interface LoginResponse {
+  access_token: string;
   user: { id: string; full_name: string; email: string };
 }
 
@@ -28,7 +29,8 @@ export default function LoginPage() {
         method: "POST",
         body: JSON.stringify(form),
       });
-      router.push("/auth/wallet");
+      localStorage.setItem("access_token", data.access_token);
+      router.push("/wallet");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -37,44 +39,59 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="relative max-w-5xl mx-auto px-6 py-16 flex justify-center overflow-hidden">
+      <div className="bg-blob top-0 left-1/3 w-64 h-64 bg-(--color-cobalt)" />
+
       <form
         onSubmit={handle_submit}
-        className="w-full max-w-sm bg-white p-6 rounded-xl shadow space-y-4"
+        className="animate-in ticket-notch relative bg-white border-2 border-(--color-ink) rounded-2xl w-full max-w-sm p-8 shadow-[6px_6px_0_0_var(--color-ink)]"
       >
-        <h1 className="text-xl font-semibold text-green-700">
-          Log in to FlyMate
-        </h1>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        <h1 className="font-display font-bold text-2xl">Welcome back</h1>
+        <p className="text-sm text-(--color-ink)/60 mt-1">
+          Log in to keep booking.
+        </p>
 
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full border rounded-lg px-3 py-2"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full border rounded-lg px-3 py-2"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-          required
-        />
+        <div className="perforation my-6" />
+
+        {error && (
+          <p className="text-sm text-(--color-coral) font-medium mb-4">
+            {error}
+          </p>
+        )}
+
+        <div className="space-y-5">
+          <input
+            type="email"
+            placeholder="Email"
+            className="w-full border-b-2 border-(--color-ink)/20 focus:border-(--color-cobalt) outline-none py-2 bg-transparent transition-colors"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full border-b-2 border-(--color-ink)/20 focus:border-(--color-cobalt) outline-none py-2 bg-transparent transition-colors"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            required
+          />
+        </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-green-700 text-white rounded-lg py-2 font-medium disabled:opacity-50"
+          className="btn-press w-full mt-8 bg-(--color-ink) text-(--color-bg) rounded-full py-3 font-display font-bold hover:bg-(--color-cobalt) transition-colors disabled:opacity-50"
         >
           {loading ? "Logging in..." : "Log in"}
         </button>
 
-        <p className="text-sm text-center text-gray-500">
+        <p className="text-sm text-center text-(--color-ink)/60 mt-5">
           No account yet?{" "}
-          <a href="/register" className="text-green-700 font-medium">
+          <a
+            href="/auth/register"
+            className="font-medium text-(--color-cobalt)"
+          >
             Sign up
           </a>
         </p>

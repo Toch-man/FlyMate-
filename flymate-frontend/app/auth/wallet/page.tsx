@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api_fetch } from "../../../lib/api/api";
+import { api_fetch } from "@/lib/api/api";
 
 interface VirtualAccount {
   account_ref?: string;
@@ -20,9 +20,11 @@ export default function WalletPage() {
   const [wallet, setWallet] = useState<WalletResponse | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  async function load_wallet() {
-    setLoading(true);
+  async function load_wallet(is_refresh = false) {
+    if (is_refresh) setRefreshing(true);
+    else setLoading(true);
     setError("");
     try {
       const data = await api_fetch<WalletResponse>("/wallet/me");
@@ -31,6 +33,7 @@ export default function WalletPage() {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }
 
@@ -39,47 +42,63 @@ export default function WalletPage() {
   }, []);
 
   if (loading) {
-    return <div className="p-6 text-gray-500">Loading wallet...</div>;
+    return (
+      <div className="p-10 text-center text-[var(--color-ink)]/50">
+        Loading wallet...
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="p-6 text-red-600">{error}</div>;
+    return (
+      <div className="p-10 text-center text-[var(--color-coral)] font-medium">
+        {error}
+      </div>
+    );
   }
 
   const va = wallet?.virtual_account;
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-10">
-      <div className="max-w-md mx-auto bg-white rounded-xl shadow p-6 space-y-6">
-        <div>
-          <p className="text-sm text-gray-500">Wallet balance</p>
-          <p className="text-3xl font-semibold text-green-700">
-            ₦{(wallet?.wallet_balance ?? 0).toLocaleString()}
-          </p>
-        </div>
+    <div className="relative max-w-5xl mx-auto px-6 py-16 flex justify-center overflow-hidden">
+      <div className="bg-blob top-0 left-1/4 w-64 h-64 bg-[var(--color-lime)]" />
+      <div className="bg-blob bottom-0 right-1/4 w-64 h-64 bg-[var(--color-coral)]" />
+
+      <div className="animate-in ticket-notch relative bg-white border-2 border-[var(--color-ink)] rounded-2xl w-full max-w-sm p-8 shadow-[6px_6px_0_0_var(--color-ink)]">
+        <p className="text-xs uppercase tracking-wide text-[var(--color-ink)]/50">
+          Wallet balance
+        </p>
+        <p className="font-ticket text-4xl font-medium mt-1">
+          ₦{(wallet?.wallet_balance ?? 0).toLocaleString()}
+        </p>
+
+        <div className="perforation my-6" />
 
         {va ? (
-          <div className="border rounded-lg p-4 space-y-1 bg-gray-50">
-            <p className="text-sm text-gray-500">
-              Fund this wallet by transferring to:
+          <div className="bg-[var(--color-bg)] border-2 border-[var(--color-ink)]/10 rounded-xl p-4 space-y-1">
+            <p className="text-xs uppercase tracking-wide text-[var(--color-ink)]/50">
+              Fund this wallet by transferring to
             </p>
-            <p className="font-medium">{va.bank_account_number}</p>
-            <p className="text-sm">{va.bank_name}</p>
-            <p className="text-sm text-gray-500">{va.bank_account_name}</p>
+            <p className="font-ticket text-xl font-medium">
+              {va.bank_account_number}
+            </p>
+            <p className="text-sm font-medium">{va.bank_name}</p>
+            <p className="text-sm text-[var(--color-ink)]/60">
+              {va.bank_account_name}
+            </p>
           </div>
         ) : (
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-[var(--color-ink)]/60">
             No virtual account on file yet.
           </p>
         )}
 
-        {/* Balance updates arrive via webhook asynchronously — this button
-            just re-fetches, it doesn't trigger anything itself. */}
         <button
-          onClick={load_wallet}
-          className="w-full border border-green-700 text-green-700 rounded-lg py-2 font-medium hover:bg-green-50"
+          onClick={() => load_wallet(true)}
+          disabled={refreshing}
+          className="btn-press w-full mt-6 border-2 border-[var(--color-ink)] rounded-full py-3 font-display font-bold hover:bg-[var(--color-lime)] transition-colors disabled:opacity-50"
         >
-          Refresh balance
+          {refreshing ? "Refreshing..." : "Refresh balance"}
         </button>
       </div>
     </div>

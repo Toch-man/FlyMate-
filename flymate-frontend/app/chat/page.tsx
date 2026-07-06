@@ -120,10 +120,11 @@ export default function ChatPage() {
             of the app */}
         {flight_options && flight_options.length > 0 && (
           <div className="space-y-3">
-            {flight_options.map((flight) => (
+            {flight_options.map((flight, idx) => (
               <div
                 key={flight.offer_id}
-                className="ticket-notch relative bg-white border-2 border-[var(--color-ink)] rounded-2xl p-5"
+                style={{ animationDelay: `${idx * 80}ms` }}
+                className="animate-in ticket-notch relative bg-white border-2 border-[var(--color-ink)] rounded-2xl p-5"
               >
                 <div className="flex items-center justify-between font-ticket text-xl font-medium">
                   <span>{flight.origin}</span>
@@ -144,7 +145,7 @@ export default function ChatPage() {
                   <button
                     type="button"
                     onClick={() => book_flight(flight)}
-                    className="bg-[var(--color-lime)] text-[var(--color-ink)] px-5 py-2 rounded-full font-display font-bold text-sm hover:bg-[var(--color-cobalt)] hover:text-white transition-colors"
+                    className="btn-press bg-[var(--color-lime)] text-[var(--color-ink)] px-5 py-2 rounded-full font-display font-bold text-sm hover:bg-[var(--color-cobalt)] hover:text-white transition-colors"
                   >
                     Book this
                   </button>
@@ -174,7 +175,7 @@ export default function ChatPage() {
         <button
           type="submit"
           disabled={loading}
-          className="bg-[var(--color-ink)] text-[var(--color-bg)] px-6 py-3 rounded-full font-display font-bold hover:bg-[var(--color-cobalt)] transition-colors disabled:opacity-50"
+          className="btn-press bg-[var(--color-ink)] text-[var(--color-bg)] px-6 py-3 rounded-full font-display font-bold hover:bg-[var(--color-cobalt)] transition-colors disabled:opacity-50"
         >
           Send
         </button>
