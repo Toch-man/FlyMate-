@@ -1,6 +1,6 @@
 const { ChatGoogleGenerativeAI } = require("@langchain/google-genai");
 const { createReactAgent } = require("@langchain/langgraph/prebuilt");
-const { search_flights } = require("./tools/search_flights.js");
+const { search_flights } = require("../tools/search_flight");
 
 // This is the AI "brain" — the actual model that reads messages and decides
 // what to say or do. gemini-2.0-flash is fast and cheap, good for an agent
