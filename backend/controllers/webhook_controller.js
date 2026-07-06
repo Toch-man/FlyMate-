@@ -4,14 +4,45 @@ const Booking = require("../model/booking_model");
 const Transaction = require("../model/transaction_model");
 const { create_notification } = require("../utils/notify.util");
 
-function verify_signature(raw_body, req) {
+// Confirmed from Nomba's own docs (developer.nomba.com/docs/api-basics/webhook),
+// with real code samples in Go/Python/JS/Java/C#/PHP that all do the same
+// thing. This REPLACES the earlier raw-body-hex version, which didn't match
+// the documented method.
+//
+//   hashing_payload = event_type:requestId:merchant.userId:merchant.walletId
+//                      :transaction.transactionId:transaction.type
+//                      :transaction.time:transaction.responseCode
+//   message = hashing_payload + ":" + nomba-timestamp header
+//   signature = base64(HMAC-SHA256(message, your_webhook_secret))
+function verify_signature(payload, req) {
   const signature = req.headers["nomba-signature"];
-  if (!signature) return false;
+  const timestamp = req.headers["nomba-timestamp"];
+
+  if (!signature || !timestamp) return false;
+
+  const merchant = payload?.data?.merchant || {};
+  const transaction = payload?.data?.transaction || {};
+
+  let response_code = transaction.responseCode || "";
+  if (response_code === "null") response_code = "";
+
+  const hashing_payload = [
+    payload.event_type,
+    payload.requestId,
+    merchant.userId,
+    merchant.walletId,
+    transaction.transactionId,
+    transaction.type,
+    transaction.time,
+    response_code,
+  ].join(":");
+
+  const message = `${hashing_payload}:${timestamp}`;
 
   const expected_signature = crypto
     .createHmac("sha256", process.env.NOMBA_WEBHOOK_SECRET)
-    .update(raw_body)
-    .digest("hex");
+    .update(message)
+    .digest("base64");
 
   return signature === expected_signature;
 }
@@ -30,31 +61,18 @@ async function handle_nomba_webhook(req, res) {
     console.log("\nRaw Body:");
     console.log(raw_body.toString());
 
-    if (!verify_signature(raw_body, req)) {
+    const payload = JSON.parse(raw_body.toString());
+
+    if (!verify_signature(payload, req)) {
       console.warn("\n❌ Invalid webhook signature");
-
-      const computed = crypto
-        .createHmac("sha256", process.env.NOMBA_WEBHOOK_SECRET || "")
-        .update(raw_body)
-        .digest("hex");
-
-      console.warn("Received :", req.headers["nomba-signature"]);
-      console.warn("Computed :", computed);
-
+      console.warn("Received:", req.headers["nomba-signature"]);
       console.log("=================================================\n");
-
-      return res.status(401).json({
-        error: "Invalid webhook signature",
-      });
+      return res.status(401).json({ error: "Invalid webhook signature" });
     }
 
     console.log("\n✅ Signature verified");
-
-    const payload = JSON.parse(raw_body.toString());
-
     console.log("\nPayload:");
     console.log(JSON.stringify(payload, null, 2));
-
     console.log("\nEvent Type:", payload.event_type);
 
     const existing_by_request = await Transaction.findOne({
@@ -64,25 +82,16 @@ async function handle_nomba_webhook(req, res) {
     if (existing_by_request) {
       console.log("⚠ Duplicate webhook received");
       console.log("=================================================\n");
-
-      return res.status(200).json({
-        received: true,
-        duplicate: true,
-      });
+      return res.status(200).json({ received: true, duplicate: true });
     }
 
     if (payload.event_type !== "payment_success") {
       console.log("Ignoring event:", payload.event_type);
       console.log("=================================================\n");
-
-      return res.status(200).json({
-        received: true,
-        ignored: true,
-      });
+      return res.status(200).json({ received: true, ignored: true });
     }
 
     const transaction = payload?.data?.transaction || {};
-
     console.log("Transaction Type:", transaction.type);
 
     if (transaction.type === "vact_transfer") {
@@ -102,22 +111,13 @@ async function handle_nomba_webhook(req, res) {
 
     console.warn("Unknown payment_success webhook");
     console.log(payload);
-
     console.log("=================================================\n");
-
-    return res.status(200).json({
-      received: true,
-      ignored: true,
-    });
+    return res.status(200).json({ received: true, ignored: true });
   } catch (error) {
     console.error("\n❌ handle_nomba_webhook error");
     console.error(error);
-
     console.log("=================================================\n");
-
-    return res.status(500).json({
-      error: "Could not process webhook",
-    });
+    return res.status(500).json({ error: "Could not process webhook" });
   }
 }
 
@@ -132,10 +132,7 @@ async function handle_wallet_funding(payload, transaction, res) {
 
   if (!account_ref || !transaction.transactionAmount) {
     console.warn("Missing account reference or amount");
-
-    return res.status(400).json({
-      error: "Malformed webhook payload",
-    });
+    return res.status(400).json({ error: "Malformed webhook payload" });
   }
 
   const user = await User.findOne({
@@ -145,10 +142,7 @@ async function handle_wallet_funding(payload, transaction, res) {
   if (!user) {
     console.warn("No user found");
     console.warn(account_ref);
-
-    return res.status(200).json({
-      received: true,
-    });
+    return res.status(200).json({ received: true });
   }
 
   console.log("\nMatched User:");
@@ -159,9 +153,7 @@ async function handle_wallet_funding(payload, transaction, res) {
   });
 
   const previous_balance = user.wallet_balance;
-
   user.wallet_balance += amount_naira;
-
   await user.save();
 
   console.log(
@@ -187,38 +179,26 @@ async function handle_wallet_funding(payload, transaction, res) {
     type: "wallet_funded",
     title: "Wallet funded",
     message: `Your FlyMate wallet has been credited with ₦${amount_naira}.`,
-    metadata: {
-      amount: amount_naira,
-      request_id: payload.requestId,
-    },
+    metadata: { amount: amount_naira, request_id: payload.requestId },
   });
 
   console.log("Notification Created");
-
   console.log("✅ Wallet funding completed");
   console.log("====================================\n");
 
-  return res.status(200).json({
-    received: true,
-  });
+  return res.status(200).json({ received: true });
 }
 
 async function handle_card_payment(payload, order_reference, res) {
   console.log("\n========== CARD PAYMENT ==========");
-
   console.log("Order Reference:", order_reference);
 
-  const booking = await Booking.findOne({
-    order_reference,
-  });
+  const booking = await Booking.findOne({ order_reference });
 
   if (!booking) {
     console.warn("No booking found");
     console.warn(order_reference);
-
-    return res.status(200).json({
-      received: true,
-    });
+    return res.status(200).json({ received: true });
   }
 
   console.log("Booking Found:");
@@ -230,15 +210,10 @@ async function handle_card_payment(payload, order_reference, res) {
 
   if (booking.status === "confirmed") {
     console.log("Booking already confirmed");
-
-    return res.status(200).json({
-      received: true,
-      duplicate: true,
-    });
+    return res.status(200).json({ received: true, duplicate: true });
   }
 
   booking.status = "confirmed";
-
   await booking.save();
 
   console.log("Booking Confirmed");
@@ -262,22 +237,14 @@ async function handle_card_payment(payload, order_reference, res) {
     type: "booking_confirmed",
     title: "Flight booked!",
     message: `Your flight from ${booking.origin} to ${booking.destination} is confirmed.`,
-    metadata: {
-      booking_id: booking._id.toString(),
-      price: booking.price,
-    },
+    metadata: { booking_id: booking._id.toString(), price: booking.price },
   });
 
   console.log("Booking Notification Created");
-
   console.log("✅ Card payment completed");
   console.log("===================================\n");
 
-  return res.status(200).json({
-    received: true,
-  });
+  return res.status(200).json({ received: true });
 }
 
-module.exports = {
-  handle_nomba_webhook,
-};
+module.exports = { handle_nomba_webhook };

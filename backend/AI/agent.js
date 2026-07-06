@@ -1,12 +1,16 @@
 const { ChatGoogleGenerativeAI } = require("@langchain/google-genai");
 const { createReactAgent } = require("@langchain/langgraph/prebuilt");
-const { search_flights } = require("../tools/search_flight");
+const { search_flights } = require("./tools/search_flights.tool");
 
 // This is the AI "brain" — the actual model that reads messages and decides
 // what to say or do. gemini-2.0-flash is fast and cheap, good for an agent
 // that might be called a lot during testing.
+// gemini-2.0-flash was deprecated March 3, 2026 and no longer gets free-tier
+// quota allocated to it (that's what the "limit: 0" error meant — not usage
+// exhaustion, just no quota for a sunset model). gemini-2.5-flash is the
+// current free-tier-eligible equivalent.
 const model = new ChatGoogleGenerativeAI({
-  model: "gemini-2.0-flash",
+  model: "gemini-2.5-flash",
   apiKey: process.env.GEMINI_API_KEY,
 });
 
