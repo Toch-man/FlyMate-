@@ -20,7 +20,7 @@ const app = express();
 // route needs the raw request body (as bytes) to verify Nomba's signature —
 // if the global JSON parser touches the request first, those raw bytes are
 // gone and every signature check will fail.
-app.use("/webhook", webhook_routes);
+app.use("/api/webhook", webhook_routes);
 
 // Everything else uses normal JSON parsing.
 app.use(express.json());
