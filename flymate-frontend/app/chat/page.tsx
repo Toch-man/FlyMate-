@@ -99,8 +99,8 @@ export default function ChatPage() {
             <div
               className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm ${
                 msg.role === "user"
-                  ? "bg-[var(--color-ink)] text-[var(--color-bg)]"
-                  : "bg-white border-2 border-[var(--color-ink)]/10"
+                  ? "bg-(--color-ink) text-(--color-bg)"
+                  : "bg-white border-2 border-(--color-ink)/10"
               }`}
             >
               {msg.content}
@@ -110,7 +110,7 @@ export default function ChatPage() {
 
         {loading && (
           <div className="flex justify-start">
-            <div className="max-w-[80%] px-4 py-3 rounded-2xl text-sm bg-white border-2 border-[var(--color-ink)]/10 text-[var(--color-ink)]/50">
+            <div className="max-w-[80%] px-4 py-3 rounded-2xl text-sm bg-white border-2 border-(--color-ink)/10 text-(--color-ink)/50">
               Searching...
             </div>
           </div>
@@ -124,14 +124,14 @@ export default function ChatPage() {
               <div
                 key={flight.offer_id}
                 style={{ animationDelay: `${idx * 80}ms` }}
-                className="animate-in ticket-notch relative bg-white border-2 border-[var(--color-ink)] rounded-2xl p-5"
+                className="animate-in ticket-notch relative bg-white border-2 border-(--color-ink) rounded-2xl p-5"
               >
                 <div className="flex items-center justify-between font-ticket text-xl font-medium">
                   <span>{flight.origin}</span>
-                  <span className="text-[var(--color-coral)]">→</span>
+                  <span className="text-(--color-coral)">→</span>
                   <span>{flight.destination}</span>
                 </div>
-                <p className="text-sm text-[var(--color-ink)]/60 mt-1">
+                <p className="text-sm text-(--color-ink)/60 mt-1">
                   {flight.airline} ·{" "}
                   {flight.stops === 0 ? "Nonstop" : `${flight.stops} stop(s)`}
                 </p>
@@ -145,7 +145,7 @@ export default function ChatPage() {
                   <button
                     type="button"
                     onClick={() => book_flight(flight)}
-                    className="btn-press bg-[var(--color-lime)] text-[var(--color-ink)] px-5 py-2 rounded-full font-display font-bold text-sm hover:bg-[var(--color-cobalt)] hover:text-white transition-colors"
+                    className="btn-press bg-(--color-lime) text-(--color-ink) px-5 py-2 rounded-full font-display font-bold text-sm hover:bg-(--color-cobalt) hover:text-white transition-colors"
                   >
                     Book this
                   </button>
@@ -156,9 +156,7 @@ export default function ChatPage() {
         )}
 
         {error && (
-          <p className="text-sm text-[var(--color-coral)] font-medium">
-            {error}
-          </p>
+          <p className="text-sm text-(--color-coral) font-medium">{error}</p>
         )}
         <div ref={bottom_ref} />
       </div>
@@ -170,12 +168,12 @@ export default function ChatPage() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Lagos to Abuja, July 10, budget 50000"
-          className="flex-1 border-2 border-[var(--color-ink)]/20 focus:border-[var(--color-cobalt)] rounded-full px-5 py-3 outline-none transition-colors"
+          className="flex-1 border-2 border-(--color-ink)/20 focus:border-(--color-cobalt) rounded-full px-5 py-3 outline-none transition-colors"
         />
         <button
           type="submit"
           disabled={loading}
-          className="btn-press bg-[var(--color-ink)] text-[var(--color-bg)] px-6 py-3 rounded-full font-display font-bold hover:bg-[var(--color-cobalt)] transition-colors disabled:opacity-50"
+          className="btn-press bg-(--color-ink) text-(--color-bg) px-6 py-3 rounded-full font-display font-bold hover:bg-(--color-cobalt) transition-colors disabled:opacity-50"
         >
           Send
         </button>

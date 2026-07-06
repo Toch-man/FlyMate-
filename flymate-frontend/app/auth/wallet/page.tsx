@@ -43,7 +43,7 @@ export default function WalletPage() {
 
   if (loading) {
     return (
-      <div className="p-10 text-center text-[var(--color-ink)]/50">
+      <div className="p-10 text-center text-(--color-ink)/50">
         Loading wallet...
       </div>
     );
@@ -51,7 +51,7 @@ export default function WalletPage() {
 
   if (error) {
     return (
-      <div className="p-10 text-center text-[var(--color-coral)] font-medium">
+      <div className="p-10 text-center text-(--color-coral) font-medium">
         {error}
       </div>
     );
@@ -61,11 +61,11 @@ export default function WalletPage() {
 
   return (
     <div className="relative max-w-5xl mx-auto px-6 py-16 flex justify-center overflow-hidden">
-      <div className="bg-blob top-0 left-1/4 w-64 h-64 bg-[var(--color-lime)]" />
-      <div className="bg-blob bottom-0 right-1/4 w-64 h-64 bg-[var(--color-coral)]" />
+      <div className="bg-blob top-0 left-1/4 w-64 h-64 bg-(--color-lime)" />
+      <div className="bg-blob bottom-0 right-1/4 w-64 h-64 bg-(--color-coral)" />
 
-      <div className="animate-in ticket-notch relative bg-white border-2 border-[var(--color-ink)] rounded-2xl w-full max-w-sm p-8 shadow-[6px_6px_0_0_var(--color-ink)]">
-        <p className="text-xs uppercase tracking-wide text-[var(--color-ink)]/50">
+      <div className="animate-in ticket-notch relative bg-white border-2 border-(--color-ink) rounded-2xl w-full max-w-sm p-8 shadow-[6px_6px_0_0_var(--color-ink)]">
+        <p className="text-xs uppercase tracking-wide text-(--color-ink)/50">
           Wallet balance
         </p>
         <p className="font-ticket text-4xl font-medium mt-1">
@@ -75,20 +75,20 @@ export default function WalletPage() {
         <div className="perforation my-6" />
 
         {va ? (
-          <div className="bg-[var(--color-bg)] border-2 border-[var(--color-ink)]/10 rounded-xl p-4 space-y-1">
-            <p className="text-xs uppercase tracking-wide text-[var(--color-ink)]/50">
+          <div className="bg-(--color-bg) border-2 border-(--color-ink)/10 rounded-xl p-4 space-y-1">
+            <p className="text-xs uppercase tracking-wide text-(--color-ink)/50">
               Fund this wallet by transferring to
             </p>
             <p className="font-ticket text-xl font-medium">
               {va.bank_account_number}
             </p>
             <p className="text-sm font-medium">{va.bank_name}</p>
-            <p className="text-sm text-[var(--color-ink)]/60">
+            <p className="text-sm text-(--color-ink)/60">
               {va.bank_account_name}
             </p>
           </div>
         ) : (
-          <p className="text-sm text-[var(--color-ink)]/60">
+          <p className="text-sm text-(--color-ink)/60">
             No virtual account on file yet.
           </p>
         )}
@@ -96,7 +96,7 @@ export default function WalletPage() {
         <button
           onClick={() => load_wallet(true)}
           disabled={refreshing}
-          className="btn-press w-full mt-6 border-2 border-[var(--color-ink)] rounded-full py-3 font-display font-bold hover:bg-[var(--color-lime)] transition-colors disabled:opacity-50"
+          className="btn-press w-full mt-6 border-2 border-(--color-ink) rounded-full py-3 font-display font-bold hover:bg-(--color-lime) transition-colors disabled:opacity-50"
         >
           {refreshing ? "Refreshing..." : "Refresh balance"}
         </button>

@@ -127,16 +127,14 @@ function CheckoutForm() {
       </div>
 
       {error && (
-        <p className="text-sm text-[var(--color-coral)] font-medium mt-4">
-          {error}
-        </p>
+        <p className="text-sm text-(--color-coral) font-medium mt-4">{error}</p>
       )}
 
       <button
         type="button"
         onClick={handle_pay}
         disabled={loading}
-        className="btn-press w-full mt-6 bg-[var(--color-ink)] text-[var(--color-bg)] rounded-full py-3 font-display font-bold hover:bg-[var(--color-cobalt)] transition-colors disabled:opacity-50"
+        className="btn-press w-full mt-6 bg-(--color-ink) text-(--color-bg) rounded-full py-3 font-display font-bold hover:bg-(--color-cobalt) transition-colors disabled:opacity-50"
       >
         {loading ? "Processing..." : `Pay ₦${price.toLocaleString()}`}
       </button>
@@ -147,10 +145,8 @@ function CheckoutForm() {
 export default function CheckoutPage() {
   return (
     <div className="relative max-w-5xl mx-auto px-6 py-16 flex justify-center overflow-hidden">
-      <div className="bg-blob top-0 left-1/3 w-64 h-64 bg-[var(--color-cobalt)]" />
-      <Suspense
-        fallback={<p className="text-[var(--color-ink)]/60">Loading...</p>}
-      >
+      <div className="bg-blob top-0 left-1/3 w-64 h-64 bg-(--color-cobalt)" />
+      <Suspense fallback={<p className="text-(--color-ink)/60">Loading...</p>}>
         <CheckoutForm />
       </Suspense>
     </div>
