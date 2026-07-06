@@ -30,7 +30,7 @@ export default function LoginPage() {
         body: JSON.stringify(form),
       });
       localStorage.setItem("access_token", data.access_token);
-      router.push("/wallet");
+      router.push("/auth/wallet");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
