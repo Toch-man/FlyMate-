@@ -1,7 +1,17 @@
 const mongoose = require("mongoose");
 
-// Intentionally minimal — extend once the Travu/Nomba booking response
-// shape is confirmed (passenger info, price breakdown, etc).
+const passenger_schema = new mongoose.Schema(
+  {
+    given_name: { type: String, required: true },
+    family_name: { type: String, required: true },
+    born_on: { type: String, required: true },
+    gender: { type: String, enum: ["m", "f"], required: true },
+    email: { type: String, required: true },
+    phone_number: { type: String, required: true },
+  },
+  { _id: false },
+);
+
 const booking_schema = new mongoose.Schema(
   {
     user_id: {
@@ -11,20 +21,19 @@ const booking_schema = new mongoose.Schema(
       index: true,
     },
     offer_id: { type: String, required: true },
-    travu_booking_id: { type: String },
     status: {
       type: String,
       enum: ["pending", "confirmed", "failed", "cancelled"],
       default: "pending",
     },
-    // "pending" + payment_method "card" means awaiting the checkout webhook
-    // to confirm payment. "pending" + "wallet" shouldn't normally be seen —
-    // wallet payments confirm synchronously since the balance check happens
-    // immediately, no async webhook wait needed.
     payment_method: { type: String, enum: ["card", "wallet"], required: true },
-    // Only set for card payments — this is how the webhook finds which
-    // booking a payment_success event belongs to.
     order_reference: { type: String, index: true, sparse: true },
+    passenger: { type: passenger_schema, required: true },
+    // Set for real Duffel bookings only.
+    duffel_order_id: { type: String },
+    // Set for FlyMate Demo Airline bookings instead.
+    is_demo: { type: Boolean, default: false },
+    demo_ticket: { type: mongoose.Schema.Types.Mixed },
     origin: { type: String, required: true },
     destination: { type: String, required: true },
     depart_date: { type: Date, required: true },

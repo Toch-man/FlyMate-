@@ -1,11 +1,12 @@
-const User = require("../models/user.model");
-const Booking = require("../models/booking.model");
-const Transaction = require("../models/transaction.model");
+const User = require("../model/user");
+const Booking = require("../model/booking_model");
+const Transaction = require("../model/transaction_model");
 const { create_notification } = require("../utils/notify.util");
 const {
   create_checkout_order,
   get_checkout_order_status,
 } = require("../services/nomba.service");
+const { generate_demo_ticket } = require("../utils/demo_flight.util");
 
 async function checkout(req, res) {
   try {
@@ -16,6 +17,7 @@ async function checkout(req, res) {
       depart_date,
       price,
       payment_method,
+      passenger,
     } = req.body;
 
     if (
@@ -24,11 +26,12 @@ async function checkout(req, res) {
       !destination ||
       !depart_date ||
       !price ||
-      !payment_method
+      !payment_method ||
+      !passenger
     ) {
       return res.status(400).json({
         error:
-          "offer_id, origin, destination, depart_date, price and payment_method are required",
+          "offer_id, origin, destination, depart_date, price, payment_method and passenger are all required",
       });
     }
 
@@ -38,17 +41,35 @@ async function checkout(req, res) {
         .json({ error: "payment_method must be 'card' or 'wallet'" });
     }
 
+    const required_passenger_fields = [
+      "given_name",
+      "family_name",
+      "born_on",
+      "gender",
+      "email",
+      "phone_number",
+    ];
+    const missing = required_passenger_fields.filter(
+      (field) => !passenger[field],
+    );
+    if (missing.length > 0) {
+      return res
+        .status(400)
+        .json({ error: `Missing passenger fields: ${missing.join(", ")}` });
+    }
+
     const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
     const flight_details = {
+      offer_id,
       origin,
       destination,
       depart_date,
       price,
-      offer_id,
+      passenger,
     };
 
     if (payment_method === "wallet") {
@@ -62,11 +83,21 @@ async function checkout(req, res) {
   }
 }
 
-// Wallet payments confirm immediately — the balance check IS the payment,
-// no external step or webhook wait involved.
+// Demo-only now — generates a ticket, no external transfer of any kind.
+function complete_booking(booking) {
+  const demo_ticket = generate_demo_ticket({
+    offer_id: booking.offer_id,
+    passenger: booking.passenger,
+  });
+  booking.is_demo = true;
+  booking.demo_ticket = demo_ticket;
+  booking.status = "confirmed";
+  return demo_ticket;
+}
+
 async function pay_with_wallet(
   user,
-  { offer_id, origin, destination, depart_date, price },
+  { offer_id, origin, destination, depart_date, price, passenger },
   res,
 ) {
   if (user.wallet_balance < price) {
@@ -83,13 +114,17 @@ async function pay_with_wallet(
   const booking = await Booking.create({
     user_id: user._id,
     offer_id,
-    status: "confirmed",
+    status: "pending",
     payment_method: "wallet",
+    passenger,
     origin,
     destination,
     depart_date,
     price,
   });
+
+  const demo_ticket = complete_booking(booking);
+  await booking.save();
 
   await Transaction.create({
     user_id: user._id,
@@ -109,18 +144,14 @@ async function pay_with_wallet(
     metadata: { booking_id: booking._id.toString(), price },
   });
 
-  return res.status(201).json({
-    booking,
-    wallet_balance: user.wallet_balance,
-  });
+  return res
+    .status(201)
+    .json({ booking, demo_ticket, wallet_balance: user.wallet_balance });
 }
 
-// Card payments are async — the booking starts "pending" and only becomes
-// "confirmed" once the webhook tells us the checkout order actually
-// succeeded. The frontend redirects the user to checkout_link to pay.
 async function pay_with_card(
   user,
-  { offer_id, origin, destination, depart_date, price },
+  { offer_id, origin, destination, depart_date, price, passenger },
   res,
 ) {
   const booking = await Booking.create({
@@ -128,6 +159,7 @@ async function pay_with_card(
     offer_id,
     status: "pending",
     payment_method: "card",
+    passenger,
     origin,
     destination,
     depart_date,
@@ -147,10 +179,7 @@ async function pay_with_card(
   booking.order_reference = order_reference;
   await booking.save();
 
-  return res.status(201).json({
-    booking,
-    checkout_link: order.checkoutLink,
-  });
+  return res.status(201).json({ booking, checkout_link: order.checkoutLink });
 }
 
 async function get_my_bookings(req, res) {
@@ -165,14 +194,6 @@ async function get_my_bookings(req, res) {
   }
 }
 
-// Used by the callback page — the user lands here right after paying, often
-// before the webhook has processed yet, so the frontend polls this briefly.
-//
-// IMPORTANT: this does NOT just trust the webhook. If a card booking is
-// still "pending", it actively asks Nomba what actually happened before
-// answering. That covers the webhook being slow, dropped, or misconfigured —
-// this endpoint self-heals regardless, which is the right way to handle
-// this even outside of tonight's deadline pressure.
 async function get_booking_by_id(req, res) {
   try {
     const booking = await Booking.findOne({
@@ -193,16 +214,13 @@ async function get_booking_by_id(req, res) {
           order_reference: booking.order_reference,
         });
 
-        // Field name for "it succeeded" isn't confirmed yet — checking a
-        // few likely spots defensively rather than guessing one and failing
-        // silently.
         const succeeded =
           order_status?.paymentStatus === "SUCCESS" ||
           order_status?.status === "SUCCESS" ||
           order_status?.orderStatus === "SUCCESS";
 
         if (succeeded) {
-          booking.status = "confirmed";
+          complete_booking(booking);
           await booking.save();
 
           await Transaction.create({
@@ -212,7 +230,7 @@ async function get_booking_by_id(req, res) {
             status: "success",
             booking_id: booking._id,
             merchant_tx_ref: `${booking.order_reference}_verified`,
-            narration: `Card payment for flight ${booking.origin} to ${booking.destination} (confirmed via status check)`,
+            narration: `Card payment for flight ${booking.origin} to ${booking.destination}`,
           });
 
           await create_notification({
@@ -227,8 +245,6 @@ async function get_booking_by_id(req, res) {
           });
         }
       } catch (status_check_error) {
-        // Don't fail the whole request just because the live check failed —
-        // fall back to whatever we already have in the database.
         console.error(
           "checkout order status check failed:",
           status_check_error,

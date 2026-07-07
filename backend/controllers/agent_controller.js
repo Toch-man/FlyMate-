@@ -1,9 +1,5 @@
-const { flymate_agent } = require("../AI/agent");
+const { create_flymate_agent } = require("../AI/agent");
 
-// Keeping history as simple {role, content} pairs only (no raw tool-call
-// messages echoed back) — much lower risk of a serialization mismatch than
-// round-tripping LangChain's internal message objects through JSON, and
-// plenty for maintaining conversation context.
 async function chat_with_agent(req, res) {
   try {
     const { message, history } = req.body;
@@ -12,15 +8,16 @@ async function chat_with_agent(req, res) {
       return res.status(400).json({ error: "message is required" });
     }
 
-    const result = await flymate_agent.invoke({
+    // A fresh agent per request, bound to whoever is actually logged in —
+    // this is what makes check_wallet_balance/book_flight safe to trust.
+    const agent = create_flymate_agent(req.user.id);
+
+    const result = await agent.invoke({
       messages: [...(history || []), { role: "user", content: message }],
     });
 
     const last_message = result.messages[result.messages.length - 1];
 
-    // Find the most recent tool result, if the agent searched for flights
-    // this turn, so the frontend can render real clickable flight cards
-    // instead of just parsing the AI's prose.
     const last_tool_message = [...result.messages]
       .reverse()
       .find((m) => m._getType?.() === "tool");

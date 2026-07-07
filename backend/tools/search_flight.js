@@ -1,23 +1,22 @@
 const { tool } = require("@langchain/core/tools");
 const { z } = require("zod");
-const { search_flights_duffel } = require("../services/duffel.service");
+const { build_demo_flight_offer } = require("../utils/demo_flight.util");
 
-// Same interface as the mock version — the agent doesn't know or care that
-// this is now hitting a real API instead of returning a fake array.
+// Duffel removed entirely — only the FlyMate Demo Airline offer now, always
+// returned instantly, zero external API dependency.
 async function search_flights_handler({
   origin,
   destination,
   depart_date,
   budget,
 }) {
-  const flights = await search_flights_duffel({
+  const demo_offer = build_demo_flight_offer({
     origin,
     destination,
-    departure_date: depart_date,
+    depart_date,
     budget,
   });
-
-  return JSON.stringify(flights);
+  return JSON.stringify([demo_offer]);
 }
 
 const search_flights = tool(search_flights_handler, {
