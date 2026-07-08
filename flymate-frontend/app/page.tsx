@@ -26,13 +26,13 @@ export default function HomePage() {
         </p>
         <div className="mt-8 flex items-center gap-4">
           <Link
-            href="/register"
+            href="/auth/register"
             className="btn-press bg-(--color-ink) text-(--color-bg) px-6 py-3 rounded-full font-display font-bold hover:bg-(--color-cobalt) transition-colors"
           >
             Get started
           </Link>
           <Link
-            href="/login"
+            href="/auth/login"
             className="btn-press px-6 py-3 rounded-full font-display font-bold border-2 border-(--color-ink) hover:border-(--color-cobalt) hover:text-(--color-cobalt) transition-colors"
           >
             Log in

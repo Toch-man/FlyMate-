@@ -129,7 +129,7 @@ async function pay_with_wallet(
   await Transaction.create({
     user_id: user._id,
     type: "flight_payment",
-    amount: price,
+    amount: price * 100, //kobo
     status: "success",
     booking_id: booking._id,
     merchant_tx_ref: `booking_${booking._id}`,

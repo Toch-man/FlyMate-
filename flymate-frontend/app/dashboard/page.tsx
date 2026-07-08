@@ -64,7 +64,7 @@ export default function DashboardPage() {
       {/* Top stats row */}
       <div className="grid grid-cols-2 gap-4 mt-8">
         <Link
-          href="/wallet"
+          href="/auth/wallet"
           className="ticket-notch bg-white border-2 border-[var(--color-ink)] rounded-2xl p-5 hover:bg-[var(--color-lime)]/20 transition-colors"
         >
           <p className="text-xs uppercase tracking-wide text-[var(--color-ink)]/50">
@@ -75,7 +75,7 @@ export default function DashboardPage() {
           </p>
         </Link>
         <Link
-          href="/bookings"
+          href="/Booking"
           className="ticket-notch bg-white border-2 border-[var(--color-ink)] rounded-2xl p-5 hover:bg-[var(--color-cobalt)]/10 transition-colors"
         >
           <p className="text-xs uppercase tracking-wide text-[var(--color-ink)]/50">
@@ -92,7 +92,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-display font-bold text-lg">Recent bookings</h2>
           <Link
-            href="/bookings"
+            href="/Booking"
             className="text-sm font-medium text-[var(--color-cobalt)]"
           >
             View all →
